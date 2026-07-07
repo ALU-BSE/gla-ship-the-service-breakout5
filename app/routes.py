@@ -5,7 +5,7 @@ from flask import jsonify
 def register_routes(app):
     @app.route("/health")
     def health():
-        return jsonify({"status": "ok", "service": "nairobipulse"})   
+        return jsonify({"status": "error", "service": "nairobipulse"})
 
     @app.route("/districts")
     def districts():
