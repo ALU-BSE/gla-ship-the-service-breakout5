@@ -1,0 +1,7 @@
+services:
+  api:
+    build: .                      # build from the local Dockerfile
+    ports:
+      - "5000:5000"               # host_port:container_port
+    environment:
+      FLASK_ENV: development      # passed into the container as an env var
