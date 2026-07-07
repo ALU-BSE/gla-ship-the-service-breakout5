@@ -27,3 +27,21 @@
 - **Failure A prediction:** the flake8 step. Trailing whitespace and an unused import are lint errors, so the job dies at step 4 and the tests never run. Prediction confirmed by the log.
 - **Failure B prediction:** the pytest step. The code still lints, but the health test asserts `"status": "ok"` and the route now returns `"error"`. Confirmed.
 - **Who fixes a CI failure:** whoever is available should be free to fix it so main goes green quickly, but the person who broke it should review the fix and understand it. Owner-only fixing creates bottlenecks when that person is offline; anyone-fixes without follow-up means the author never learns what went wrong.
+
+## Retro — Ownership Round
+
+- **R1 (Dockerfile):** I owned the Dockerfile. The decision I would explain to a new teammate is keeping `USER appuser` after the install steps because dependency installation needs root but the running app must not have it.
+- **R2 (docker-compose.yml):** I owned the Compose file. I kept it to a single `api` service with `build: .` so anyone gets the full stack with one command and the image always comes from our own Dockerfile.
+- **R3 (ci.yml):** I owned the CI workflow. I put lint and tests before the build-and-push step because nothing should reach GHCR unless the quality gate passed.
+- **R4 (security review):** I owned the security sign-off. I insisted `.env` files stay in `.dockerignore` because a secret copied into an image layer stays in that image even if the file is deleted later.
+- **R5 (deliberate failures):** I owned breaking the pipeline. I broke lint and tests on separate branches so the team could see exactly which step catches which class of mistake.
+- **R6 (notes and README):** I owned the team notes and README update. I recorded answers during the discussions rather than after, because reconstructed notes lose the disagreements that were the useful part.
+
+## Retro — One-Sentence Round
+
+- **R1:** Before today I thought a Dockerfile was just an install script, but doing it showed me each instruction creates a cached layer and their order matters.
+- **R2:** Before today I thought Compose was only for multi-container apps, but doing it showed me it is worth it even for one service just to standardise how everyone runs it.
+- **R3:** Before today I thought pushing to a registry needed manually configured secrets, but doing it showed me the auto-injected `GITHUB_TOKEN` with a `permissions` block is enough.
+- **R4:** Before today I thought running containers as root was the default everyone accepted, but doing it showed me dropping to a non-root user costs two lines.
+- **R5:** Before today I thought a red pipeline meant something went wrong, but doing it showed me a failure that blocks a bad image is the pipeline working.
+- **R6:** Before today I thought CI was mainly about running tests, but doing it showed me the real product is a tested image anyone can pull by commit SHA.
