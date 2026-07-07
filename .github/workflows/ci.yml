@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - main          # branch protection already blocks direct pushes to main
+  pull_request:
+    branches:
+      - main          # always run when a PR targets main
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write   # required to push images to GHCR
+
+    steps:
+      # ── 1. Fetch the source code ─────────────────────────────────────────
+      - uses: actions/checkout@v4
+
+      # ── 2. Install uv (no need for setup-python — uv manages Python too) ─
+      - uses: astral-sh/setup-uv@v4
+
+      # ── 3. Install project dependencies ──────────────────────────────────
+      - run: uv pip install -r requirements.txt
+
+      # ── 4. Lint — job fails here on any flake8 error ─────────────────────
+      - run: uv run flake8 app/ tests/
+
+      # ── 5. Tests — job fails here if any test fails ───────────────────────
+      - run: uv run pytest
+
+      # ── 6. Log in to GitHub Container Registry ───────────────────────────
+      #       GITHUB_TOKEN is automatically available — no secrets to configure
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 7. Build the image AND push to GHCR ──────────────────────────────
+      #       Tag: ghcr.io/<owner>/<repo>:<commit-sha>
+      #       This step fails if the Docker build fails — same gate as before.
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
