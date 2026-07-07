@@ -1,4 +1,41 @@
 [![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=24215936)
+
+# NairobiPulse
+
+A city-data aggregator API packaged to run the same everywhere: Docker for the runtime, Docker Compose for a one-command start, and a GitHub Actions pipeline that lints, tests, and publishes every tested image to GHCR.
+
+## Endpoints
+
+| Route | Response |
+|---|---|
+| `GET /health` | `{"service":"nairobipulse","status":"ok"}` |
+| `GET /districts` | `{"districts":["Westlands","Kibera","Karen","Eastleigh","Kasarani"]}` |
+
+## Run locally with uv
+
+```bash
+pip install uv
+uv pip install -r requirements.txt
+uv run pytest
+python -m app.main
+```
+
+## Run with Docker Compose
+
+```bash
+docker compose up --build
+```
+
+The service starts on port 5000.
+
+## CI pipeline
+
+Every push to a feature branch and every PR targeting `main` runs `.github/workflows/ci.yml`: install dependencies with uv, lint with flake8, run pytest, then build the Docker image and push it to GHCR tagged with the commit SHA. A failure at any step stops the run, so no untested image is ever published.
+
+Session discussion notes, warm-up answers, and the closing retro live in [team-notes.md](team-notes.md).
+
+---
+
 # GLA: Ship the Service — 90-Minute Breakout Edition
 
 > **Format:** GitHub Classroom group activity conducted as a Google Meet breakout session
